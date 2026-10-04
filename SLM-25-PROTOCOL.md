@@ -137,6 +137,18 @@ the reply checksum. On the real meter, every reply's checksum was correct.
   unknown. Changing one setting at a time would confirm the rest. Work LED and alarm mode are still to be mapped. When writing, NoiseLogger
   puts the current PC time into the block.
 
+  Recording results, `06` block only (confirmed 2026-10-04, matching NoiseLogger's "Record
+  Parameters" rows "Test Records" and "Is ... Alarm"):
+
+  | Offset | Field | Example |
+  |---|---|---|
+  | `0x49`–`0x4A` | **Test records**: readings in the recording (counts up while recording) | `00 11` = 17 |
+  | `0x4C` | **Alarm flags**, NoiseLogger order TEMP=1, HUMI=2, **Noise=4**, CO2=8 **(?)**; noise bit confirmed | `04` = noise alarm |
+
+  The noise bit was set by recording with the level above the high limit (meter display: OVER;
+  UNDER = below the low limit). Whether UNDER also sets it is untested. NoiseLogger's row list
+  also confirms `0x37` = **Work LED** (no visible LED on the SLM-25).
+
   **`05` vs `06`:** `05` is the stored configuration for the **next** recording, updated by
   Set Parameters. `06` holds the settings the **current/last recording** was made with, plus
   its real start time at `0x45` and a copy of total records at `0x4A`. After a Set Parameters
@@ -173,10 +185,15 @@ A5 03 00 40 E8 / A5 03 00 00 A8   recording control
 
 ## Still to do
 
-1. Parameter byte `0x37` (always `01`; work LED?), alarm mode, and the rest of the
+1. Parameter byte `0x37` = Work LED per NoiseLogger's labels: flipping it (2026-10-04) changed
+   nothing visible. No light while recording either way, and the live data was the same.
+   It's probably NoiseLogger's "Work LED", which the SLM-25 lacks (the dialog is shared
+   across the logger family). Also still unmapped: alarm mode, and the rest of the
    block. Use one-change experiments in NoiseLogger, or NoiseLogger's serializer at
    `0x4149d0`.
-2. Live byte 8 (always `03`).
+2. Live byte 8: always `03` in every state tried (idle, recording, FULL, A/C, FAST/SLOW,
+   MAX/MIN, backlight on). Probably a fixed device/firmware code. The backlight is not
+   reported anywhere.
 3. What `03 00` does, if anything.
 4. Where recordings after the first (without a parameter write in between) start in
    memory: the 64- vs 128-slot boundary.
