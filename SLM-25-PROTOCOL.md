@@ -102,8 +102,10 @@ the reply checksum. On the real meter, every reply's checksum was correct.
      moment while starting (flash erase), and `06` gets the start time.
   3. **Stop:** `03 40` ends it immediately (recording flag 1 → 0 within 1 s; 4 of 5 readings
      kept), or it ends by itself at total records.
-  Display: **REC** while recording, **FULL** after reaching total records, **blank** after a
-  stop. In both ended states REC is ignored until the parameters are written again.
+  Display: **REC** while recording (blinking, apparently once per reading), **FULL** after
+  reaching total records, **blank** after a stop. In both ended states REC is ignored until the
+  parameters are written again. FULL stays on the display after re-arming, until REC is pressed;
+  the meter is armed even though FULL still shows.
   **Immediately mode:** writing the parameters with `0x44` = 1 **starts a recording at once**
   (start time = setting time, first reading within 1 s). That's how to start a recording
   remotely. `03 00` **also stops a running recording**, exactly like `03 40`: flag 1 → 0 within
