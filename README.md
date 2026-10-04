@@ -8,6 +8,8 @@ from Linux, including on a Raspberry Pi.
 - `slm25.py`: a single-file Python tool (Python ≥ 3.7, [pyusb](https://pypi.org/project/pyusb/))
 - `SLM-25-PROTOCOL.md`: the full serial protocol, recovered from NoiseLogger and checked
   command by command on a real meter
+- `lua/`: the same as a Lua 5.4 library (`slm25.lua`) plus a Lua version of the tool.
+  See `lua/README.md`
 
 ## Setup (Raspberry Pi OS / Debian / Ubuntu)
 
