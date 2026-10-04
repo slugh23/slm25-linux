@@ -1,0 +1,7 @@
+# Let members of "plugdev" use the SLM-25 (WCH CH9326 USB-HID bridge, 1a86:e010) without root.
+# Install:
+#   sudo cp 99-slm25.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload && sudo udevadm trigger
+# then unplug and replug the meter. Raspberry Pi OS's default user is already in plugdev;
+# otherwise: sudo usermod -aG plugdev $USER (and log in again).
+SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="e010", MODE="0660", GROUP="plugdev"

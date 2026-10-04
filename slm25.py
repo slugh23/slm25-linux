@@ -3,10 +3,10 @@
 slm25.py - talk to an SLM-25 sound level meter (CH9326 USB-HID bridge) from Linux.
 
 Protocol: see SLM-25-PROTOCOL.md (recovered from NoiseLogger V2.1 and checked
-against a real SLM-25). The USB layer mirrors ../lib/ch9326.c.
+against a real SLM-25). The CH9326 USB layer is described there too.
 
 Requires pyusb (`pip install pyusb`, or `sudo apt install python3-usb`) and
-access to the device (../99-ch9326.rules, or run as root). Python >= 3.7.
+access to the device (99-slm25.rules, or run as root). Python >= 3.7.
 
 Examples:
     slm25.py identify
@@ -30,7 +30,7 @@ EP_OUT, EP_IN = 0x02, 0x82
 REPORT_SIZE = 32
 PAYLOAD_MAX = REPORT_SIZE - 1
 
-# ch9326_set() encoding (see PROTOCOL.md in CH9326LinuxTest): 115200 8N1
+# CH9326 UART setup report (see SLM-25-PROTOCOL.md, "USB layer"): 115200 8N1
 BAUD_115200 = (0x83, 0xCC)
 CFG_8N1 = 0xC0 | 0x04 | 0x03      # no parity, "1 stop" bit as the vendor lib sets it, 8 bits
 RX_INTERVAL = 0x10                # value NoiseLogger uses
@@ -92,7 +92,7 @@ class CH9326Transport:
         except usb.core.USBError as e:
             if getattr(e, "errno", None) == 13:
                 raise ProtocolError("permission denied opening the CH9326 - install "
-                                    "99-ch9326.rules (repo root) or run with sudo")
+                                    "99-slm25.rules (see README) or run with sudo")
             raise ProtocolError("cannot open the CH9326: %s" % e)
         self._rx = bytearray()
         self._configure_uart()
@@ -540,7 +540,7 @@ def main():
     s.set_defaults(func=cmd_live)
 
     s = sub.add_parser("params", help="read the 81-byte parameter block (read-only)")
-    s.add_argument("--second", action="store_true", help="read the 2nd set (cmd 06)")
+    s.add_argument("--second", action="store_true", help="read the settings and results of the current/last recording (cmd 06)")
     s.add_argument("--save", metavar="FILE", help="also save the raw block")
     s.set_defaults(func=cmd_params)
 

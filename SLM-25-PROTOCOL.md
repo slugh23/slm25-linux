@@ -12,7 +12,7 @@ Tool: `slm25.py` in this folder (Python + pyusb) implements all of it. Run
 
 | Item | Value |
 |---|---|
-| USB | CH9326 HID bridge, `1a86:e010` (stock ID, so `lib/ch9326.c` finds it unchanged) |
+| USB | WCH CH9326 USB-HID-to-UART bridge, stock ID `1a86:e010` (see "USB layer" below) |
 | UART | **115200 baud, 8N1**, CH9326 interval 0x10 → `ch9326_set(i, B115200, P_NONE, STOP_1, BIT_8, 0x10)` |
 | Timeouts | 400 ms read / 400 ms write |
 | Flow | strict request → reply; one transaction at a time |
@@ -20,6 +20,20 @@ Tool: `slm25.py` in this folder (Python + pyusb) implements all of it. Run
 
 NoiseLogger can also talk over an ordinary COM port. The byte protocol below is plain
 serial, and the CH9326 just carries it.
+
+## USB layer (CH9326)
+
+The SLM-25 has no USB logic of its own. A WCH CH9326 chip turns its UART into a USB HID
+device, so no driver is needed. The CH9326's own protocol was recovered from WCH's Linux
+library (`libch9326.so`). A portable C reimplementation and the full details are at
+<https://github.com/slugh23/CH9326LinuxTest> (branch `portable-libusb`). What this tool needs:
+
+| Item | Value |
+|---|---|
+| Interface | 0 (HID, no report IDs); the kernel's `usbhid` is detached while in use |
+| UART data out | Interrupt OUT EP `0x02`: `[N, data × N]`, N ≤ 31. The last chunk may be a short `N+1`-byte packet |
+| UART data in | Interrupt IN EP `0x82`, 32-byte reports: `[N, data × N, padding]`. One SLM-25 reply can span several reports |
+| UART setup | HID SET_REPORT (`bmRequestType 0x21`, `bRequest 0x09`, `wValue 0x0200`), 32-byte report `FF C7 83 CC 10 00…` = 115200 baud, 8N1, packing interval `0x10` |
 
 ## Framing
 
