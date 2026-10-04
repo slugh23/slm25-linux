@@ -399,8 +399,10 @@ def cmd_params(m, a):
     if a.second:
         # status block only: results of the current/last recording
         print("  test records   %d" % be16(0x49))
-        print("  noise alarm    %s  (0x4C bit 0x04; set by exceeding the high limit, low limit untested)"
-              % ("ALARM" if block[0x4C] & 0x04 else "Normal"))
+        # 0x4B = below-low-limit flags, 0x4C = above-high-limit flags; bit 0x04 = noise
+        hits = [name for off, name in ((0x4B, "UNDER low limit"), (0x4C, "OVER high limit"))
+                if block[off] & 0x04]
+        print("  noise alarm    %s" % (", ".join(hits) if hits else "Normal"))
     print("  sample level   %s" % ("SLOW" if block[0x39] else "FAST"))
     # Multi-byte fields that NoiseLogger byte-swaps (big-endian) for model TL202
     print("All big-endian fields NoiseLogger uses:")

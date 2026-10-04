@@ -143,10 +143,12 @@ the reply checksum. On the real meter, every reply's checksum was correct.
   | Offset | Field | Example |
   |---|---|---|
   | `0x49`–`0x4A` | **Test records**: readings in the recording (counts up while recording) | `00 11` = 17 |
-  | `0x4C` | **Alarm flags**, NoiseLogger order TEMP=1, HUMI=2, **Noise=4**, CO2=8 **(?)**; noise bit confirmed | `04` = noise alarm |
+  | `0x4B` | **Low-limit alarm flags** (level went below the low limit; display UNDER) | `04` = noise |
+  | `0x4C` | **High-limit alarm flags** (level went above the high limit; display OVER) | `04` = noise |
 
-  The noise bit was set by recording with the level above the high limit (meter display: OVER;
-  UNDER = below the low limit). Whether UNDER also sets it is untested. NoiseLogger's row list
+  Bit `0x04` = noise, in both bytes. The other bits are presumably TEMP=1, HUMI=2, CO2=8 for
+  NoiseLogger's other loggers **(?)**. Both cases were confirmed by recording with the limits
+  set past the room level (2026-10-04). Starting a new recording clears both bytes. NoiseLogger's row list
   also confirms `0x37` = **Work LED** (no visible LED on the SLM-25).
 
   **`05` vs `06`:** `05` is the stored configuration for the **next** recording, updated by
