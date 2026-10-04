@@ -43,7 +43,7 @@ the reply checksum. On the real meter, every reply's checksum was correct.
 | `00` | Identify | `A5 00 A5` | 11 bytes: `5A 00 "TL202" 00 00 00 8E` |
 | `01` | Live reading | `A5 01 A6` | 18 bytes: `5A 01` + 15 data + sum |
 | `02` | Set clock | `A5 02 t3 t2 t1 t0 00 00 sum` | 4 bytes: `5A 02 55 sum` |
-| `03` | Recording control: `40` = **stop** (confirmed), `00` = no known effect | `A5 03 00 xx sum` | 4 bytes: `5A 03 55 sum` |
+| `03` | **Stop recording** (`xx` = `40` or `00`, both confirmed to stop) | `A5 03 00 xx sum` | 4 bytes: `5A 03 55 sum` |
 | `04` | Write parameters (confirmed) | 3× `A5 04 pg <27 bytes> sum` (pg = 0,1,2) | 4 bytes per page: `5A 04 pg sum` |
 | `05` | Read parameters | 3× `A5 05 pg sum` | 31 bytes: `5A 05 pg <27 bytes> sum` |
 | `06` | Read the settings of the current/last recording, plus its start time | as `05` | as `05` |
@@ -106,8 +106,9 @@ the reply checksum. On the real meter, every reply's checksum was correct.
   stop. In both ended states REC is ignored until the parameters are written again.
   **Immediately mode:** writing the parameters with `0x44` = 1 **starts a recording at once**
   (start time = setting time, first reading within 1 s). That's how to start a recording
-  remotely. `03 00` was acknowledged but had no visible effect in any state tried (idle,
-  armed, FULL, Manual or Immediately).
+  remotely. `03 00` **also stops a running recording**, exactly like `03 40`: flag 1 → 0 within
+  1 s, display blank, REC ignored until the next parameter write. When the meter is idle, armed
+  or FULL, both values do nothing. No difference between them has been found (2026-10-04).
   Live bytes 6–7 count the readings as they arrive (1, 2, 3, ...).
 - **03 Recording:** NoiseLogger maps two internal states (0x40 and 0x80) to `xx = 40` and
   `xx = 00`. It sends this before reading parameters, and the "Stop Recording" button
@@ -196,7 +197,7 @@ A5 03 00 40 E8 / A5 03 00 00 A8   recording control
 2. Live byte 8: always `03` in every state tried (idle, recording, FULL, A/C, FAST/SLOW,
    MAX/MIN, backlight on). Probably a fixed device/firmware code. The backlight is not
    reported anywhere.
-3. What `03 00` does, if anything.
+3. Whether the `03` value (`40` vs `00`) changes anything that isn't visible.
 4. Where recordings after the first (without a parameter write in between) start in
    memory: the 64- vs 128-slot boundary.
 

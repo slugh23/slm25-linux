@@ -577,8 +577,8 @@ def main():
     sub.add_parser("set-time", help="WRITES: set the meter clock to this PC's local time"
                    ).set_defaults(func=cmd_set_time)
 
-    s = sub.add_parser("record", help="WRITES: raw recording control (cmd 03): 40 = stop, "
-                       "00 = no known effect")
+    s = sub.add_parser("record", help="WRITES: raw recording control (cmd 03); both 40 "
+                       "and 00 stop a running recording (no difference seen)")
     s.add_argument("value", choices=["40", "00"])
     s.set_defaults(func=cmd_record)
 
